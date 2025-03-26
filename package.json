@@ -5,8 +5,8 @@
   "description": "Sistema de gestão para assistências técnicas de celulares",
   "scripts": {
     "dev": "vite",
-    "build": "cp \"Paulo Cell/index.html\" . && cd \"Paulo Cell\" && npm install && npm run build && mkdir -p ../dist && cp -r dist/* ../dist/",
-    "vercel-build": "cp \"Paulo Cell/index.html\" . && cd \"Paulo Cell\" && npm install && npm run build && mkdir -p ../dist && cp -r dist/* ../dist/",
+    "build": "vite build",
+    "vercel-build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
