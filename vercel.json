@@ -1,9 +1,9 @@
 {
-  "buildCommand": "cd \"Paulo Cell\" && npm install && npm run build",
+  "buildCommand": "bash ./build.sh",
   "outputDirectory": "Paulo Cell/dist",
   "framework": "vite",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/Paulo Cell/dist/index.html" }
   ]
 } 
