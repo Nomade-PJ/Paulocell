@@ -5,8 +5,8 @@
   "description": "Sistema de gestão para assistências técnicas de celulares",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "vercel-build": "prisma generate && vite build",
+    "build": "vite build --root \"Paulo Cell\"",
+    "vercel-build": "prisma generate && vite build --root \"Paulo Cell\"",
     "preview": "vite preview"
   },
   "dependencies": {
