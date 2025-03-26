@@ -1,6 +1,6 @@
 {
-  "buildCommand": "prisma generate && vite build --root \"Paulo Cell\"",
-  "outputDirectory": "dist",
+  "buildCommand": "cd \"Paulo Cell\" && npm install && npm run build",
+  "outputDirectory": "Paulo Cell/dist",
   "framework": "vite",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
