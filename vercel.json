@@ -1,9 +1,9 @@
 {
   "buildCommand": "bash ./build.sh",
-  "outputDirectory": "Paulo Cell/dist",
+  "outputDirectory": "dist",
   "framework": "vite",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/Paulo Cell/dist/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
-} 
+}
