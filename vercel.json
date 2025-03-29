@@ -1,9 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "node build-script.js",
-  "outputDirectory": "dist",
+  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/server.js" }
   ]
 }
