@@ -1,24 +1,15 @@
 #!/bin/bash
 
-echo "Iniciando build customizado..."
-echo "Instalando dependências na raiz..."
-npm install
+echo "Iniciando processo de cópia..."
 
-echo "Copiando index.html para raiz se necessário..."
-if [ ! -f "index.html" ]; then
-  cp "Paulo Cell/index.html" .
-fi
+# Criar pasta dist e copiar arquivos estáticos
+mkdir -p dist
+cp index.html dist/
+cp -r public dist/
 
-echo "Instalando o Vite globalmente..."
-npm install -g vite
+# Para debug
+ls -la
+echo "Conteúdo atual:"
+ls -la dist/
 
-echo "Entrando na pasta Paulo Cell..."
-cd "Paulo Cell" || exit 1
-
-echo "Instalando dependências dentro da pasta Paulo Cell..."
-npm install
-
-echo "Executando build com Vite diretamente..."
-npx vite build --outDir ../dist
-
-echo "Build concluído com sucesso!" 
+echo "Processo concluído com sucesso!" 
