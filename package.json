@@ -5,8 +5,8 @@
   "description": "Sistema de gestão para assistências técnicas de celulares",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "vercel-build": "vite build",
+    "build": "node ./node_modules/vite/bin/vite.js build",
+    "vercel-build": "node ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview"
   },
   "dependencies": {
