@@ -1,4 +1,6 @@
 {
+  "version": 2,
+  "buildCommand": "node build-script.js",
   "outputDirectory": "dist",
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },

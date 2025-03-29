@@ -4,10 +4,10 @@
   "private": true,
   "description": "Sistema de gestão para assistências técnicas de celulares",
   "scripts": {
-    "dev": "vite",
-    "build": "mkdir -p dist && cp index.html dist/ && cp -r public dist/ && cp -r src dist/",
-    "vercel-build": "mkdir -p dist && cp index.html dist/ && cp -r public dist/ && cp -r src dist/",
-    "preview": "vite preview"
+    "dev": "echo 'Development mode is disabled'",
+    "build": "node build-script.js",
+    "vercel-build": "node build-script.js",
+    "preview": "echo 'Preview mode is disabled'"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
