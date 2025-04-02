@@ -1,9 +1,0 @@
-[33mcommit 3d2096836e379c6247548759d6bca40a16f7b3fa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
-Author: Carlos Developer <carlos.j@acad.ifma.edu.br>
-Date:   Wed Mar 26 10:22:46 2025 -0300
-
-    Corrige erro de build na Vercel: Adiciona configuração para encontrar index.html e atualiza scripts de build
-
-A	index.html
-M	package.json
-A	vercel.json

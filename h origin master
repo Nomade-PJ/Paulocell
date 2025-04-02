@@ -1,3 +1,0 @@
-[33m89225e3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Solução alternativa para erro de build: script bash personalizado e atualização da configuração Vercel
-[33m8b9ddc5[m[33m ([m[1;31morigin/master[m[33m)[m Atualiza configuração do Vercel para executar build dentro da pasta Paulo Cell
-[33m3d20968[m Corrige erro de build na Vercel: Adiciona configuração para encontrar index.html e atualiza scripts de build

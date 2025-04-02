@@ -1,21 +1,29 @@
 {
-  "name": "paulocell-landing",
+  "name": "paulo-cell",
   "version": "1.0.0",
   "private": true,
-  "description": "Página de entrada para Paulo Cell",
+  "description": "Sistema de gestão para loja de celulares",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "node build-script.js"
+    "dev": "nodemon server.js",
+    "build": "bash build.sh",
+    "setup-env": "node setup-env.js",
+    "start:prod": "NODE_ENV=production node setup-env.js && NODE_ENV=production node server.js"
   },
+  "author": "Paulo Cell",
+  "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.5.0",
-    "@vercel/postgres": "^0.7.2",
-    "express": "^4.18.2",
-    "dotenv": "^16.0.3"
+    "express": "^4.18.3",
+    "mongoose": "^8.2.0",
+    "dotenv": "^16.4.1",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
-    "prisma": "^6.5.0"
+    "nodemon": "^3.0.3"
   },
   "engines": {
     "node": ">=16.0.0"

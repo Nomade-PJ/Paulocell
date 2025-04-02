@@ -2,8 +2,11 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+// Importar a configuração centralizada
+const config = require('./api/_lib/config.js').default;
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.PORT || 3000;
 
 // Middleware para servir arquivos estáticos da pasta public
 app.use(express.static(path.join(__dirname, 'public')));
@@ -62,7 +65,11 @@ app.get('/', (req, res) => {
               <h1>Paulo Cell Sistema</h1>
               <p>Sistema de Gerenciamento para Assistência Técnica de Celulares</p>
               <p>Site em manutenção. Use o link abaixo para acessar o sistema.</p>
-              <a href="https://paulocell-antiga.vercel.app/" class="btn">Acessar o Sistema</a>
+              <div class="cta">
+                <h2>Pronto para começar?</h2>
+                <p>Entre no sistema para gerenciar sua loja de forma eficiente.</p>
+                <a href="/paulo-cell" class="btn">Acessar o Sistema</a>
+              </div>
             </div>
           </body>
         </html>
@@ -88,5 +95,5 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
 
-// Para o Vercel
+// Exporta a app para ser usada em outros ambientes
 module.exports = app; 

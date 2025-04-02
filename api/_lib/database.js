@@ -3,14 +3,15 @@ import { PrismaClient } from '@prisma/client';
 import mongoose from 'mongoose';
 import { Pool } from 'pg';
 import getMongooseModels from '../../models/mongoose';
+import config from './config.js';
 
 // Variáveis que manterão as conexões ativas
 let prismaClient = null;
 let mongoClient = null;
 let pgClient = null;
 
-// Configuração do tipo de banco de dados - pode ser alterado através de variável de ambiente
-const dbType = process.env.DB_TYPE || 'prisma'; // Opções: 'prisma', 'mongoose', 'pg'
+// Configuração do tipo de banco de dados - obtido do arquivo de configuração centralizado
+const dbType = config.DB_TYPE || 'prisma'; // Opções: 'prisma', 'mongoose', 'pg'
 
 /**
  * Conecta ao banco de dados especificado na configuração
@@ -30,7 +31,7 @@ export async function connectToDatabase() {
         prismaClient = new PrismaClient({
           datasources: {
             db: {
-              url: process.env.DATABASE_URL
+              url: config.DATABASE_URL
             }
           }
         });
@@ -42,7 +43,7 @@ export async function connectToDatabase() {
 
       case 'mongoose':
         // Usar MongoDB via Mongoose
-        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/paulocell';
+        const mongoUri = config.DB_URI || 'mongodb://localhost:27017/paulocell';
         
         if (!mongoose.connection.readyState) {
           mongoClient = await mongoose.connect(mongoUri, {
@@ -59,7 +60,7 @@ export async function connectToDatabase() {
       case 'pg':
         // Usar PostgreSQL diretamente via pg
         pgClient = new Pool({
-          connectionString: process.env.DATABASE_URL,
+          connectionString: config.DATABASE_URL,
           ssl: { rejectUnauthorized: false }
         });
         

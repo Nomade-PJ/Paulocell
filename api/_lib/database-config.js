@@ -1,158 +1,130 @@
 /**
- * Configuração central do banco de dados com suporte a múltiplos provedores
- * 
- * Este arquivo gerencia as diferentes opções de banco de dados suportadas pela aplicação:
- * - Prisma: ORM para conexão com PostgreSQL (recomendado para produção no Vercel)
- * - Vercel Postgres: Conecta diretamente ao Vercel Postgres SQL sem ORM
- * - MongoDB: Conexão com MongoDB usando Mongoose
+ * Configuração e gerenciamento de conexão com o banco de dados.
+ * Este módulo suporta diferentes tipos de conexão:
+ * - Prisma: ORM para conexão com PostgreSQL ou MongoDB
+ * - Mongoose: ODM para conexão com MongoDB
  */
 
-import { connectToDatabase as connectToPrisma } from './database';
-import vercelPg from './vercel-postgres';
+import config from './config.js';
 import prismaClient from './prisma-client';
 
-// Tipo de banco de dados configurado por variável de ambiente
-const DB_TYPE = process.env.DB_TYPE || 'prisma'; // Usando Prisma como padrão
+// Configuração do banco de dados baseada nas variáveis de ambiente do config centralizado
+const DB_TYPE = config.DB_TYPE || 'prisma';
+const DB_INIT_KEY = config.DB_INIT_KEY || 'default-key-insecure';
 
-// Variável para armazenar a conexão persistente
+// Instância do cliente de banco de dados (será inicializada sob demanda)
 let dbClientInstance = null;
 
 /**
- * Retorna o cliente de banco de dados adequado com base na configuração
- * Garante que a mesma instância seja reusada para todas as solicitações
- * @returns Cliente de banco de dados configurado
+ * Obtém o cliente de banco de dados, inicializando-o se necessário
+ * @returns {Object} Cliente de banco de dados configurado
  */
-export async function getDatabaseClient() {
-  // Se já temos uma instância, retorna ela (Singleton pattern)
+export async function getDbClient() {
+  // Se já foi inicializado, retorna a instância existente
   if (dbClientInstance) {
-    console.log('✅ Reutilizando conexão existente com o banco de dados');
     return dbClientInstance;
   }
 
-  console.log(`🔌 Criando nova conexão com o banco de dados (${DB_TYPE})...`);
+  console.log(`🔌 Inicializando conexão de banco de dados (tipo: ${DB_TYPE})...`);
 
+  // Inicializa o cliente de banco de dados com base no tipo configurado
   try {
     switch (DB_TYPE) {
       case 'prisma':
-        // Usando Prisma (conexão compartilhada)
+        // Verifica a conexão com o banco de dados via Prisma
+        await prismaClient.checkConnection();
         dbClientInstance = prismaClient;
         console.log('✅ Conexão estabelecida com Prisma');
         break;
-      
-      case 'vercel-postgres':
-        // Verifica a conexão com o Vercel Postgres
-        await vercelPg.checkConnection();
-        dbClientInstance = vercelPg;
-        console.log('✅ Conexão estabelecida com Vercel Postgres');
-        break;
-      
+
       case 'mongoose':
-      case 'mongodb':
-        // Conecta ao MongoDB via Mongoose
-        const { client, models } = await connectToPrisma();
-        dbClientInstance = { client, models };
-        console.log('✅ Conexão estabelecida com MongoDB');
+        // Verificar a conexão com MongoDB via Mongoose
+        const mongooseModule = await import('./mongoose-client.js');
+        await mongooseModule.default.checkConnection();
+        dbClientInstance = mongooseModule.default;
+        console.log('✅ Conexão estabelecida com MongoDB (Mongoose)');
         break;
-      
+
       default:
-        console.warn(`⚠️ Tipo de banco de dados desconhecido: ${DB_TYPE}. Usando Vercel Postgres como padrão.`);
-        await vercelPg.checkConnection();
-        dbClientInstance = vercelPg;
+        console.warn(`⚠️ Tipo de banco de dados desconhecido: ${DB_TYPE}. Usando Prisma como padrão.`);
+        await prismaClient.checkConnection();
+        dbClientInstance = prismaClient;
         break;
     }
-    
+
     return dbClientInstance;
   } catch (error) {
-    console.error('❌ Erro ao conectar com banco de dados:', error);
+    console.error('❌ Erro ao inicializar conexão com banco de dados:', error);
     throw new Error(`Falha ao conectar ao banco de dados: ${error.message}`);
   }
 }
 
 /**
- * Inicializa o banco de dados na primeira inicialização
- * Útil para configuração inicial em ambientes de desenvolvimento
+ * Inicializa o banco de dados, criando tabelas e estruturas necessárias
+ * @param {string} initKey Chave de inicialização para autorizar a operação
  */
-export async function initializeDatabase() {
-  console.log(`🔌 Inicializando banco de dados (${DB_TYPE})...`);
-  
+export async function initializeDatabase(initKey) {
+  // Verificar chave de segurança
+  if (initKey !== DB_INIT_KEY) {
+    throw new Error('Chave de inicialização inválida');
+  }
+
   try {
-    switch (DB_TYPE) {
-      case 'vercel-postgres':
-        await vercelPg.initializeDatabase();
-        break;
-      
-      // Outros tipos podem ser adicionados conforme necessário
-      
-      default:
-        // Para Prisma, a migração já cuida da inicialização
-        console.log('✅ Usando Prisma que já gerencia a estrutura do banco de dados');
-        break;
+    const dbClient = await getDbClient();
+
+    // Dependendo do tipo de banco, inicializa as estruturas adequadas
+    if (DB_TYPE === 'prisma') {
+      await prismaClient.initializeDatabase();
+    } else if (DB_TYPE === 'mongoose') {
+      const mongooseModule = await import('./mongoose-client.js');
+      await mongooseModule.default.initializeDatabase();
     }
-    
-    console.log('✅ Banco de dados inicializado com sucesso!');
-    return true;
+
+    return { success: true };
   } catch (error) {
-    console.error('❌ Falha ao inicializar banco de dados:', error);
-    return false;
+    console.error('❌ Erro ao inicializar banco de dados:', error);
+    throw new Error(`Falha ao inicializar estruturas do banco: ${error.message}`);
   }
 }
 
-// Adicionando função para testar conexão e listar todos os dados 
-// Útil para diagnóstico de problemas de compartilhamento de dados
-export async function testDatabaseConnection() {
+/**
+ * Verifica se a conexão com o banco de dados está ativa
+ * @returns {Object} Status da conexão
+ */
+export async function checkDatabaseConnection() {
   try {
-    const client = await getDatabaseClient();
+    const dbClient = await getDbClient();
     
-    // Testa diferentes tipos de banco
+    let connectionStatus = {};
+    
+    // Verificar status específico por tipo de banco
     if (DB_TYPE === 'prisma') {
-      const userCount = await client.$queryRaw`SELECT COUNT(*) FROM users`;
-      const serviceCount = await client.$queryRaw`SELECT COUNT(*) FROM services`;
-      const inventoryCount = await client.$queryRaw`SELECT COUNT(*) FROM inventory_items`;
-      
-      return {
-        success: true,
+      connectionStatus = {
+        connected: true,
+        type: 'PostgreSQL/MySQL via Prisma',
         message: 'Conexão com Prisma estabelecida com sucesso',
-        stats: {
-          users: userCount[0].count,
-          services: serviceCount[0].count,
-          inventory: inventoryCount[0].count
-        }
       };
-      
-    } else if (DB_TYPE === 'vercel-postgres') {
-      const usersResult = await client.sql`SELECT COUNT(*) FROM users`;
-      const servicesResult = await client.sql`SELECT COUNT(*) FROM services`;
-      const inventoryResult = await client.sql`SELECT COUNT(*) FROM inventory_items`;
-      
-      return {
-        success: true,
-        message: 'Conexão com Vercel Postgres estabelecida com sucesso',
-        stats: {
-          users: usersResult.rows[0].count,
-          services: servicesResult.rows[0].count,
-          inventory: inventoryResult.rows[0].count
-        }
+    } else if (DB_TYPE === 'mongoose') {
+      connectionStatus = {
+        connected: true,
+        type: 'MongoDB via Mongoose',
+        message: 'Conexão com MongoDB estabelecida com sucesso',
       };
     }
     
-    return {
-      success: true, 
-      message: 'Conexão estabelecida, mas não implementada verificação para este tipo',
-      dbType: DB_TYPE
-    };
+    return connectionStatus;
   } catch (error) {
-    console.error('❌ Falha no teste de conexão:', error);
+    console.error('❌ Erro ao verificar conexão:', error);
     return {
-      success: false,
-      message: `Erro ao testar conexão: ${error.message}`,
-      error: error.stack
+      connected: false,
+      error: error.message,
+      details: error.stack
     };
   }
 }
 
 export default {
-  getDatabaseClient,
+  getDbClient,
   initializeDatabase,
-  testDatabaseConnection,
-  DB_TYPE
+  checkDatabaseConnection
 };

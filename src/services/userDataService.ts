@@ -300,6 +300,16 @@ export async function syncPendingData(userId: string): Promise<SyncResult> {
     };
   }
   
+  // Importar syncManager para verificar operações pendentes
+  const { syncManager } = await import('./syncManager');
+  const pendingCount = syncManager.getPendingOperationsCount();
+  
+  if (pendingCount > 0) {
+    console.log(`[UserData] Processando ${pendingCount} operações pendentes via syncManager`);
+    // Processar operações pendentes no syncManager
+    await syncManager.processPendingOperations();
+  }
+  
   if (!navigator.onLine) {
     return {
       success: false,
@@ -530,4 +540,4 @@ function updateLocalCache(userId: string, store: string, serverData: any[]) {
   } catch (error) {
     console.error('[UserData] Erro ao atualizar cache local:', error);
   }
-} 
+}
